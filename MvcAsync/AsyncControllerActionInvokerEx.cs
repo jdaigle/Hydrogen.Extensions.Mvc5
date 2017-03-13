@@ -37,34 +37,28 @@ namespace MvcAsync
                 return _cachedTaskFromResultFalse;
             }
 
-            FilterInfo filterInfo = GetFilters(controllerContext, actionDescriptor);
+            var filterInfo = GetFilters(controllerContext, actionDescriptor);
 
             try
             {
-                AuthenticationContext authenticationContext
-                    = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
+                var authenticationContext = InvokeAuthenticationFilters(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor);
                 if (authenticationContext.Result != null)
                 {
                     // An authentication filter signaled that we should short-circuit the request. Let all
                     // authentication filters contribute to an action result (to combine authentication
                     // challenges). Then, run this action result.
-                    AuthenticationChallengeContext challengeContext =
-                        InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor, authenticationContext.Result);
-
+                    var challengeContext = InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor, authenticationContext.Result);
                     InvokeActionResult(controllerContext, challengeContext.Result ?? authenticationContext.Result);
                     return _cachedTaskFromResultTrue;
                 }
 
-                AuthorizationContext authorizationContext
-                    = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
+                AuthorizationContext authorizationContext = InvokeAuthorizationFilters(controllerContext, filterInfo.AuthorizationFilters, actionDescriptor);
                 if (authorizationContext.Result != null)
                 {
                     // An authorization filter signaled that we should short-circuit the request. Let all
                     // authentication filters contribute to an action result (to combine authentication
                     // challenges). Then, run this action result.
-                    AuthenticationChallengeContext challengeContext =
-                        InvokeAuthenticationFiltersChallenge(controllerContext,
-                        filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
+                    var challengeContext = InvokeAuthenticationFiltersChallenge(controllerContext, filterInfo.AuthenticationFilters, actionDescriptor, authorizationContext.Result);
                     InvokeActionResult(controllerContext, challengeContext.Result ?? authorizationContext.Result);
                     return _cachedTaskFromResultTrue;
                 }
@@ -74,7 +68,7 @@ namespace MvcAsync
                     ValidateRequest(controllerContext);
                 }
 
-                IDictionary<string, object> parameters = GetParameterValues(controllerContext, actionDescriptor);
+                var parameters = GetParameterValues(controllerContext, actionDescriptor);
                 return InvokeInvokeActionMethodWithFiltersAsync(controllerContext, filterInfo, actionDescriptor, parameters);
             }
             catch (ThreadAbortException)
@@ -86,7 +80,7 @@ namespace MvcAsync
             catch (Exception ex)
             {
                 // something blew up, so execute the exception filters
-                ExceptionContext exceptionContext = InvokeExceptionFilters(controllerContext, filterInfo.ExceptionFilters, ex);
+                var exceptionContext = InvokeExceptionFilters(controllerContext, filterInfo.ExceptionFilters, ex);
                 if (!exceptionContext.ExceptionHandled)
                 {
                     throw;
@@ -142,8 +136,7 @@ namespace MvcAsync
 
         public virtual Task<ActionResult> InvokeActionMethodAsync(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
         {
-            AsyncActionDescriptor asyncActionDescriptor = actionDescriptor as AsyncActionDescriptor;
-            if (asyncActionDescriptor != null)
+            if (actionDescriptor is AsyncActionDescriptor asyncActionDescriptor)
             {
                 return InvokeAsynchronousActionMethod(controllerContext, asyncActionDescriptor, parameters);
             }
@@ -155,6 +148,7 @@ namespace MvcAsync
 
         private async Task<ActionResult> InvokeAsynchronousActionMethod(ControllerContext controllerContext, AsyncActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
         {
+            // We need to wrap the APM BeginExecute/EndExecute in a Task that we can await
             object returnValue = await Task.Factory.FromAsync(actionDescriptor.BeginExecute, actionDescriptor.EndExecute, controllerContext, parameters, null).ConfigureAwait(false);
             ActionResult result = base.CreateActionResult(controllerContext, actionDescriptor, returnValue);
             return result;
@@ -204,7 +198,7 @@ namespace MvcAsync
                 // If there are no more filters to recurse over, create the main result
                 if (filterIndex > _filterCount - 1)
                 {
-                    var result = await _invoker.InvokeActionMethodAsync(_controllerContext, _actionDescriptor, _parameters);
+                    var result = await _invoker.InvokeActionMethodAsync(_controllerContext, _actionDescriptor, _parameters).ConfigureAwait(false);
                     return new ActionExecutedContext(_controllerContext, _actionDescriptor, canceled: false, exception: null)
                     {
                         Result = result,
@@ -231,7 +225,7 @@ namespace MvcAsync
 
                 try
                 {
-                    postContext = await InvokeActionMethodFilterAsynchronouslyRecursive(nextFilterIndex);
+                    postContext = await InvokeActionMethodFilterAsynchronouslyRecursive(nextFilterIndex).ConfigureAwait(false);
                     wasError = false;
                 }
                 catch (ThreadAbortException)
