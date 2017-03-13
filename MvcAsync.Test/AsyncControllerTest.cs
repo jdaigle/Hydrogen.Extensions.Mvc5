@@ -4,64 +4,61 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Async;
 using System.Web.Mvc.Filters;
-using BenchmarkDotNet.Attributes;
+using System.Web.Routing;
 using Moq;
+using Xunit;
 
-namespace MvcAsync.Benchmark
+namespace MvcAsync
 {
-    public class AsyncControllerActionInvokerBenchmark
+    public class AsyncControllerTest
     {
-        private ControllerContext controllerContext;
-
-        [Setup]
-        public void Setup()
+        [Fact]
+        public void AsyncControllerEx_AsyncControllerActionInvoker_BeginExecute()
         {
-            controllerContext = GetControllerContext();
+            var requestContext = GetRequestContext("NormalAction");
+            var controller = new TestController() as IAsyncController;
+            ((Controller)controller).ActionInvoker = new AsyncControllerActionInvoker();
+
+            IAsyncResult asyncResult = controller.BeginExecute(requestContext, null, null);
+            controller.EndExecute(asyncResult);
         }
 
-        [Benchmark]
-        public void AsyncControllerActionInvoker_BeginInvokeAction_NormalAction()
+        [Fact]
+        public void AsyncControllerEx_AsyncControllerActionInvokerEx_BeginExecute()
         {
-            controllerContext.Controller = new TestController();
-            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+            var requestContext = GetRequestContext("NormalAction");
+            var controller = new TestController() as IAsyncController;
+            ((Controller)controller).ActionInvoker = new AsyncControllerActionInvokerEx();
 
-            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "NormalAction", null, null);
-            bool retVal = invoker.EndInvokeAction(asyncResult);
+            IAsyncResult asyncResult = controller.BeginExecute(requestContext, null, null);
+            controller.EndExecute(asyncResult);
         }
 
-        [Benchmark]
-        public void AsyncControllerActionInvokerEx_BeginInvokeAction_NormalAction()
+        [Fact]
+        public async Task AsyncControllerEx_AsyncControllerActionInvokerEx_ExecuteAsync()
         {
-            controllerContext.Controller = new TestController();
-            AsyncControllerActionInvokerEx invoker = new AsyncControllerActionInvokerEx();
+            var requestContext = GetRequestContext("NormalAction");
+            var controller = new TestController() as AsyncControllerEx;
+            ((Controller)controller).ActionInvoker = new AsyncControllerActionInvokerEx();
 
-            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "NormalAction", null, null);
-            bool retVal = invoker.EndInvokeAction(asyncResult);
+            await controller.ExecuteAsync(requestContext).ConfigureAwait(false);
         }
 
-        [Benchmark]
-        public async Task AsyncControllerActionInvokerEx_InvokeAction_NormalAction()
-        {
-            controllerContext.Controller = new TestController();
-            AsyncControllerActionInvokerEx invoker = new AsyncControllerActionInvokerEx();
-
-            bool retVal = await invoker.InvokeActionAsync(controllerContext, "NormalAction").ConfigureAwait(false);
-        }
-
-        private static ControllerContext GetControllerContext()
+        private static RequestContext GetRequestContext(string actionName = null)
         {
             Mock<HttpRequestBase> mockHttpRequest = new Mock<HttpRequestBase>();
             Mock<HttpContextBase> mockHttpContext = new Mock<HttpContextBase>();
             mockHttpContext.SetupGet(t => t.Request).Returns(mockHttpRequest.Object);
-
-            return new ControllerContext()
+            RouteData routeData = new RouteData();
+            if (actionName != null)
             {
-                Controller = new TestController(),
-                HttpContext = mockHttpContext.Object
-            };
+                routeData.Values["action"] = actionName;
+            }
+
+            return new RequestContext(mockHttpContext.Object, routeData);
         }
 
-        private class TestController : Controller
+        private class TestController : AsyncControllerEx
         {
             public string Log { get; set; }
 

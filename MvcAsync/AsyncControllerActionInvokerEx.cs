@@ -69,7 +69,7 @@ namespace MvcAsync
                 }
 
                 var parameters = GetParameterValues(controllerContext, actionDescriptor);
-                return InvokeInvokeActionMethodWithFiltersAsync(controllerContext, filterInfo, actionDescriptor, parameters);
+                return InnerInvokeActionMethodWithFiltersAsync(controllerContext, filterInfo, actionDescriptor, parameters);
             }
             catch (ThreadAbortException)
             {
@@ -91,7 +91,7 @@ namespace MvcAsync
             return _cachedTaskFromResultTrue;
         }
 
-        public async Task<bool> InvokeInvokeActionMethodWithFiltersAsync(ControllerContext controllerContext, FilterInfo filterInfo, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
+        private async Task<bool> InnerInvokeActionMethodWithFiltersAsync(ControllerContext controllerContext, FilterInfo filterInfo, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
         {
             try
             {
@@ -134,7 +134,7 @@ namespace MvcAsync
             return invocation.InvokeActionMethodFilterAsynchronouslyRecursive(StartingFilterIndex);
         }
 
-        public virtual Task<ActionResult> InvokeActionMethodAsync(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
+        public Task<ActionResult> InvokeActionMethodAsync(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary<string, object> parameters)
         {
             if (actionDescriptor is AsyncActionDescriptor asyncActionDescriptor)
             {
