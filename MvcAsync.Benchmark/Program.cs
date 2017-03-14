@@ -6,7 +6,7 @@ namespace MvcAsync.Benchmark
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<AsyncControllerBenchmark>();
+            //BenchmarkRunner.Run<AsyncControllerBenchmark>();
             BenchmarkRunner.Run<AsyncControllerActionInvokerBenchmark>();
         }
     }

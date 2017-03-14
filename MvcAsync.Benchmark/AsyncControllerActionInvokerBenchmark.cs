@@ -20,16 +20,6 @@ namespace MvcAsync.Benchmark
         }
 
         [Benchmark]
-        public void AsyncControllerActionInvoker_BeginInvokeAction_NormalAction()
-        {
-            controllerContext.Controller = new TestController();
-            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
-
-            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "NormalAction", null, null);
-            bool retVal = invoker.EndInvokeAction(asyncResult);
-        }
-
-        [Benchmark]
         public void AsyncControllerActionInvokerEx_BeginInvokeAction_NormalAction()
         {
             controllerContext.Controller = new TestController();
@@ -46,6 +36,16 @@ namespace MvcAsync.Benchmark
             AsyncControllerActionInvokerEx invoker = new AsyncControllerActionInvokerEx();
 
             bool retVal = await invoker.InvokeActionAsync(controllerContext, "NormalAction").ConfigureAwait(false);
+        }
+
+        [Benchmark]
+        public void AsyncControllerActionInvoker_BeginInvokeAction_NormalAction()
+        {
+            controllerContext.Controller = new TestController();
+            AsyncControllerActionInvoker invoker = new AsyncControllerActionInvoker();
+
+            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, "NormalAction", null, null);
+            bool retVal = invoker.EndInvokeAction(asyncResult);
         }
 
         private static ControllerContext GetControllerContext()
@@ -70,9 +70,9 @@ namespace MvcAsync.Benchmark
             [NoOpAuthorizationFilter]
             [NoOpActionFilter]
             [NoOpResultFilter]
-            public ActionResult NormalAction()
+            public async Task<ActionResult> NormalAction()
             {
-                return new LoggingActionResult("From action");
+                return await Task.FromResult(new LoggingActionResult("From action"));
             }
 
             public class LoggingActionResult : ActionResult
