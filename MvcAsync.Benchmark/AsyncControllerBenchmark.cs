@@ -8,8 +8,9 @@ using System.Web.Routing;
 using BenchmarkDotNet.Attributes;
 using Moq;
 
-namespace MvcAsync
+namespace MvcAsync.Benchmark
 {
+    [Config(typeof(Config))]
     public class AsyncControllerBenchmark
     {
         private RequestContext requestContext;

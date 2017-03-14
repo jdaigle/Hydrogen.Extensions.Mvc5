@@ -1,4 +1,6 @@
-﻿using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Running;
 
 namespace MvcAsync.Benchmark
 {
@@ -8,6 +10,15 @@ namespace MvcAsync.Benchmark
         {
             //BenchmarkRunner.Run<AsyncControllerBenchmark>();
             BenchmarkRunner.Run<AsyncControllerActionInvokerBenchmark>();
+        }
+    }
+
+    class Config : ManualConfig
+    {
+        public Config()
+        {
+            Add(new MemoryDiagnoser());
+            //Add(new InliningDiagnoser());
         }
     }
 }

@@ -9,6 +9,7 @@ using Moq;
 
 namespace MvcAsync.Benchmark
 {
+    [Config(typeof(Config))]
     public class AsyncControllerActionInvokerBenchmark
     {
         private ControllerContext controllerContext;
