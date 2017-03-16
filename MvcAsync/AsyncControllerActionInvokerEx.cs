@@ -165,6 +165,8 @@ namespace MvcAsync
             private readonly int _filterCount;
             private readonly ActionExecutingContext _preContext;
 
+            private ActionExecutedContext _actionExecutedContext;
+
             internal AsyncInvocationWithFilters(AsyncControllerActionInvokerEx invoker, ControllerContext controllerContext, ActionDescriptor actionDescriptor, IList<IActionFilter> filters, IDictionary<string, object> parameters)
             {
                 Contract.Assert(invoker != null);
@@ -205,10 +207,40 @@ namespace MvcAsync
                     };
                 }
 
+
+                // Use the filters in forward direction
+                int nextFilterIndex = filterIndex + 1;
+
                 // Otherwise process the filters recursively
                 IActionFilter filter = _filters[filterIndex];
                 ActionExecutingContext preContext = _preContext;
-                filter.OnActionExecuting(preContext);
+                if (filter is IAsyncActionFilter asyncActionFilter)
+                {
+                    await asyncActionFilter.OnActionExecutionAsync(preContext, async () =>
+                    {
+                        // If we get here, it means that an async filter set a result AND called next(). This is forbidden.
+                        // TODO: check
+
+                        // TODO: await in a try/catch block?
+                        _actionExecutedContext = await InvokeActionMethodFilterAsynchronouslyRecursive(nextFilterIndex).ConfigureAwait(false);
+                        return _actionExecutedContext;
+                    }).ConfigureAwait(false);
+
+                    if (_actionExecutedContext == null)
+                    {
+                        // If we get here then the filter didn't call 'next' indicating a short circuit
+                        _actionExecutedContext = new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: true, exception: null)
+                        {
+                            Result = preContext.Result
+                        };
+                    }
+
+                    return _actionExecutedContext;
+                }
+                else
+                {
+                    filter.OnActionExecuting(preContext);
+                }
                 if (preContext.Result != null)
                 {
                     return new ActionExecutedContext(preContext, preContext.ActionDescriptor, canceled: true, exception: null)
@@ -216,9 +248,6 @@ namespace MvcAsync
                         Result = preContext.Result
                     };
                 }
-
-                // Use the filters in forward direction
-                int nextFilterIndex = filterIndex + 1;
 
                 ActionExecutedContext postContext;
                 bool wasError = true;

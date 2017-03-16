@@ -65,7 +65,9 @@ namespace MvcAsync
             [NoOpExceptionFilter]
             [NoOpAuthenticationFilter]
             [NoOpAuthorizationFilter]
-            [NoOpActionFilter]
+            [NoOpActionFilter(Order = 1)]
+            [NoOpAsyncActionFilter(Order = 2)]
+            [NoOpActionFilterEx(Order = 3)]
             [NoOpResultFilter]
             public ActionResult NormalAction()
             {
@@ -89,11 +91,33 @@ namespace MvcAsync
 
             public class NoOpActionFilterAttribute : FilterAttribute, IActionFilter
             {
-                public void OnActionExecuted(ActionExecutedContext filterContext)
+                public void OnActionExecuting(ActionExecutingContext filterContext)
                 {
                 }
 
-                public void OnActionExecuting(ActionExecutingContext filterContext)
+                public void OnActionExecuted(ActionExecutedContext filterContext)
+                {
+                }
+            }
+
+            public class NoOpAsyncActionFilterAttribute : AsyncActionFilterAttribute
+            {
+                public override void OnActionExecuting(ActionExecutingContext filterContext)
+                {
+                }
+
+                public override void OnActionExecuted(ActionExecutedContext filterContext)
+                {
+                }
+            }
+
+            public class NoOpActionFilterExAttribute : ActionFilterAttribute
+            {
+                public override void OnActionExecuting(ActionExecutingContext filterContext)
+                {
+                }
+
+                public override void OnActionExecuted(ActionExecutedContext filterContext)
                 {
                 }
             }
