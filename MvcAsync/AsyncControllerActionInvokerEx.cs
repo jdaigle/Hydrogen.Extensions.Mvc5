@@ -290,39 +290,12 @@ namespace MvcAsync
             // and: https://github.com/StephenCleary/AsyncEx/blob/master/src/Nito.AsyncEx.Tasks/Interop/ApmAsyncFactory.cs
 
             var task = InvokeActionAsync(controllerContext, actionName);
-            var tcs = new TaskCompletionSource<bool>(state, TaskCreationOptions.RunContinuationsAsynchronously);
-            SynchronizationContextSwitcher.NoContext(() => CompleteAsync(task, callback, tcs));
-            return tcs.Task;
-        }
-
-        // `async void` is on purpose, to raise `callback` exceptions directly on the thread pool.
-        private static async void CompleteAsync(Task<bool> task, AsyncCallback callback, TaskCompletionSource<bool> tcs)
-        {
-            try
-            {
-                tcs.TrySetResult(await task.ConfigureAwait(false));
-            }
-            catch (OperationCanceledException ex)
-            {
-                tcs.TrySetCanceled(ex.CancellationToken);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-            finally
-            {
-                if (callback != null)
-                {
-                    callback.Invoke(tcs.Task);
-                }
-            }
+            return ApmAsyncFactory.ToBegin(task, callback, state);
         }
 
         public override bool EndInvokeAction(IAsyncResult asyncResult)
         {
-            // Wait and Unwrap any Exceptions
-            return ((Task<bool>)asyncResult).GetAwaiter().GetResult();
+            return ApmAsyncFactory.ToEnd<bool>(asyncResult);
         }
 
         /// <remarks>
