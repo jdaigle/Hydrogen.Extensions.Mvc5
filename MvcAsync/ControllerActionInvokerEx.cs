@@ -573,15 +573,6 @@ namespace MvcAsync
                             _result = actionExecutedContext.Result;
                         }
 
-                        if (scope == Scope.Exception)
-                        {
-                            // If we're inside an exception filter, let's allow those filters to 'unwind' before
-                            // the result.
-                            isCompleted = true;
-                            return Task.CompletedTask;
-                        }
-
-                        Debug.Assert(scope == Scope.Invoker);
                         goto case State.ResultBegin;
                     }
 
