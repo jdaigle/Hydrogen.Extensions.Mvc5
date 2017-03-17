@@ -402,8 +402,7 @@ namespace MvcAsync
 
                         if (exceptionContext != null)
                         {
-                            if (exceptionContext.Result != null ||
-                                exceptionContext.Exception == null ||
+                            if (exceptionContext.Exception == null ||
                                 exceptionContext.ExceptionHandled)
                             {
                                 goto case State.ExceptionHandled;
