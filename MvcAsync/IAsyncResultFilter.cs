@@ -3,7 +3,7 @@ using System.Web.Mvc;
 
 namespace MvcAsync
 {
-    public interface IAsyncResultFilter : IMvcFilter, IResultFilter
+    public interface IAsyncResultFilter : IResultFilter
     {
         Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next);
     }

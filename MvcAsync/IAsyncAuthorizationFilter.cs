@@ -3,7 +3,7 @@ using System.Web.Mvc;
 
 namespace MvcAsync
 {
-    public interface IAsyncAuthorizationFilter : IMvcFilter, IAuthorizationFilter
+    public interface IAsyncAuthorizationFilter : IAuthorizationFilter
     {
         Task OnAuthorizationAsync(AuthorizationContext context);
     }
