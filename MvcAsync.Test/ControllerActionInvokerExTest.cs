@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -17,10 +14,9 @@ namespace MvcAsync
         {
             // Arrange
             ControllerContext controllerContext = GetControllerContext();
-            ControllerActionInvokerEx invoker = new ControllerActionInvokerEx();
 
             // Act
-            var retVal = InvokeAction(invoker, controllerContext, "ActionNotFound", null, null);
+            var retVal = InvokeAction(controllerContext, "ActionNotFound", null, null);
 
             // Assert
             Assert.False(retVal);
@@ -31,10 +27,9 @@ namespace MvcAsync
         {
             // Arrange
             ControllerContext controllerContext = GetControllerContext();
-            ControllerActionInvokerEx invoker = new ControllerActionInvokerEx();
 
             // Act & assert
-            var retVal = InvokeAction(invoker, controllerContext, "ActionThrowsExceptionAndIsHandled", null, null);
+            var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsHandled", null, null);
 
             Assert.True(retVal);
             Assert.Equal("From exception filter", ((TestController)controllerContext.Controller).Log);
@@ -45,10 +40,9 @@ namespace MvcAsync
         {
             // Arrange
             ControllerContext controllerContext = GetControllerContext();
-            ControllerActionInvokerEx invoker = new ControllerActionInvokerEx();
 
             // Act & assert
-            var retVal = InvokeAction(invoker, controllerContext, "ActionThrowsExceptionAndIsHandledAsync", null, null);
+            var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsHandledAsync", null, null);
 
             Assert.True(retVal);
             Assert.Equal("From exception filter", ((TestController)controllerContext.Controller).Log);
@@ -59,12 +53,11 @@ namespace MvcAsync
         {
             // Arrange
             ControllerContext controllerContext = GetControllerContext();
-            ControllerActionInvokerEx invoker = new ControllerActionInvokerEx();
 
             // Act & assert
             AssertEx.Throws<Exception>(() =>
             {
-                var retVal = InvokeAction(invoker, controllerContext, "ActionThrowsExceptionAndIsNotHandled", null, null);
+                var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsNotHandled", null, null);
             }, @"Some exception text.");
         }
 
@@ -73,17 +66,17 @@ namespace MvcAsync
         {
             // Arrange
             ControllerContext controllerContext = GetControllerContext();
-            ControllerActionInvokerEx invoker = new ControllerActionInvokerEx();
 
             // Act & assert
             AssertEx.Throws<Exception>(() =>
             {
-                var retVal = InvokeAction(invoker, controllerContext, "ActionThrowsExceptionAndIsNotHandledAsync", null, null);
+                var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsNotHandledAsync", null, null);
             }, @"Some exception text.");
         }
 
-        private static bool InvokeAction(ControllerActionInvokerEx invoker, ControllerContext controllerContext, string actionName, AsyncCallback callback, object state)
+        private static bool InvokeAction(ControllerContext controllerContext, string actionName, AsyncCallback callback, object state)
         {
+            var invoker = new ControllerActionInvokerEx();
             IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, actionName, callback, state);
             return invoker.EndInvokeAction(asyncResult);
         }
@@ -109,48 +102,31 @@ namespace MvcAsync
             };
         }
 
-        private class TestController : AsyncController
+        private class TestController : Controller
         {
             public string Log { get; set; }
 
             [CustomExceptionFilterHandlesError]
-            public void ActionThrowsExceptionAndIsHandledAsync()
+            public Task ActionThrowsExceptionAndIsHandled()
             {
                 throw new Exception("Some exception text.");
-            }
-
-            public void ActionThrowsExceptionAndIsHandledCompleted()
-            {
             }
 
             [CustomAsyncExceptionFilterHandlesError]
-            public void ActionThrowsExceptionAndIsHandledAsyncAsync()
+            public Task ActionThrowsExceptionAndIsHandledAsync()
             {
                 throw new Exception("Some exception text.");
-            }
-
-            public void ActionThrowsExceptionAndIsHandledAsyncCompleted()
-            {
             }
 
             [CustomExceptionFilterDoesNotHandleError]
-            public void ActionThrowsExceptionAndIsNotHandledAsync()
+            public Task ActionThrowsExceptionAndIsNotHandled()
             {
                 throw new Exception("Some exception text.");
             }
-
-            public void ActionThrowsExceptionAndIsNotHandledCompleted()
-            {
-            }
-
             [CustomAsyncExceptionFilterDoesNotHandleError]
-            public void ActionThrowsExceptionAndIsNotHandledAsyncAsync()
+            public Task ActionThrowsExceptionAndIsNotHandledAsync()
             {
                 throw new Exception("Some exception text.");
-            }
-
-            public void ActionThrowsExceptionAndIsNotHandledAsyncCompleted()
-            {
             }
         }
 
