@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -25,11 +26,9 @@ namespace MvcAsync
         [Fact]
         public void InvokeAction_ActionThrowsException_Handled()
         {
-            // Arrange
-            ControllerContext controllerContext = GetControllerContext();
+            var controllerContext = GetControllerContext();
 
-            // Act & assert
-            var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsHandled", null, null);
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsHandled), null, null);
 
             Assert.True(retVal);
             Assert.Equal("From exception filter", ((TestController)controllerContext.Controller).Log);
@@ -38,11 +37,9 @@ namespace MvcAsync
         [Fact]
         public void InvokeAction_ActionThrowsException_HandledAsync()
         {
-            // Arrange
-            ControllerContext controllerContext = GetControllerContext();
+            var controllerContext = GetControllerContext();
 
-            // Act & assert
-            var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsHandledAsync", null, null);
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsHandledAsync), null, null);
 
             Assert.True(retVal);
             Assert.Equal("From exception filter", ((TestController)controllerContext.Controller).Log);
@@ -51,34 +48,75 @@ namespace MvcAsync
         [Fact]
         public void InvokeAction_ActionThrowsException_NotHandled()
         {
-            // Arrange
-            ControllerContext controllerContext = GetControllerContext();
+            var controllerContext = GetControllerContext();
 
-            // Act & assert
             AssertEx.Throws<Exception>(() =>
             {
-                var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsNotHandled", null, null);
+                var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
             }, @"Some exception text.");
         }
 
         [Fact]
         public void InvokeAction_ActionThrowsException_NotHandledAsync()
         {
-            // Arrange
-            ControllerContext controllerContext = GetControllerContext();
+            var controllerContext = GetControllerContext();
 
-            // Act & assert
             AssertEx.Throws<Exception>(() =>
             {
-                var retVal = InvokeAction(controllerContext, "ActionThrowsExceptionAndIsNotHandledAsync", null, null);
+                var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandledAsync), null, null);
             }, @"Some exception text.");
+        }
+
+        [Fact]
+        public void InvokeAction_ActionThrowsException_ThreadAbort()
+        {
+            var controllerContext = GetControllerContext();
+
+            AssertEx.Throws<ThreadAbortException>(() =>
+            {
+                var retVal = InvokeAction(controllerContext, nameof(TestController.ActionCallsThreadAbort), null, null);
+            });
+        }
+
+        [Fact]
+        public void InvokeAction_AuthorizationFilterShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+
+            // Act
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AuthorizationFilterShortCircuits), null, null);
+
+            // Assert
+            Assert.True(retVal);
+            Assert.Equal("From authorization filter", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AsyncAuthorizationFilterShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+
+            // Act
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AsyncAuthorizationFilterShortCircuits), null, null);
+
+            // Assert
+            Assert.True(retVal);
+            Assert.Equal("From authorization filter", ((TestController)controllerContext.Controller).Log);
         }
 
         private static bool InvokeAction(ControllerContext controllerContext, string actionName, AsyncCallback callback, object state)
         {
-            var invoker = new ControllerActionInvokerEx();
-            IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, actionName, callback, state);
-            return invoker.EndInvokeAction(asyncResult);
+            try
+            {
+                var invoker = new ControllerActionInvokerEx();
+                IAsyncResult asyncResult = invoker.BeginInvokeAction(controllerContext, actionName, callback, state);
+                return invoker.EndInvokeAction(asyncResult);
+            }
+            catch (ThreadAbortException)
+            {
+                Thread.ResetAbort(); // for testing, we don't actually want to abort the thread for the test, but we still want to see the exception if thrown
+                throw;
+            }
         }
 
         private static ControllerContext GetControllerContext(bool passesRequestValidation = true)
@@ -128,6 +166,23 @@ namespace MvcAsync
             {
                 throw new Exception("Some exception text.");
             }
+
+            public Task<ActionResult> ActionCallsThreadAbort()
+            {
+                Thread.CurrentThread.Abort();
+                return null;
+            }
+
+            [AuthorizationFilterReturnsResult]
+            public void AuthorizationFilterShortCircuits()
+            {
+            }
+
+            [AsyncAuthorizationFilterReturnsResult]
+            public Task AsyncAuthorizationFilterShortCircuits()
+            {
+                return Task.CompletedTask;
+            }
         }
 
         private class CustomExceptionFilterHandlesErrorAttribute : FilterAttribute, IExceptionFilter
@@ -170,6 +225,28 @@ namespace MvcAsync
 
             public Task OnExceptionAsync(ExceptionContext context)
             {
+                return Task.CompletedTask;
+            }
+        }
+
+        private class AuthorizationFilterReturnsResultAttribute : FilterAttribute, IAuthorizationFilter
+        {
+            public void OnAuthorization(AuthorizationContext filterContext)
+            {
+                filterContext.Result = new LoggingActionResult("From authorization filter");
+            }
+        }
+
+        private class AsyncAuthorizationFilterReturnsResultAttribute : FilterAttribute, IAsyncAuthorizationFilter
+        {
+            public void OnAuthorization(AuthorizationContext filterContext)
+            {
+                throw new NotSupportedException();
+            }
+
+            public Task OnAuthorizationAsync(AuthorizationContext context)
+            {
+                context.Result = new LoggingActionResult("From authorization filter");
                 return Task.CompletedTask;
             }
         }

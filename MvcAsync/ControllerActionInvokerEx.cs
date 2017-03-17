@@ -92,7 +92,7 @@ namespace MvcAsync
             // TODO: this is a nasty little hack to get around how MVC splits up the filters
             _cursor = new FilterCursor(
                         filters.AuthenticationFilters.Cast<object>()
-                .Concat(filters.AuthenticationFilters.Cast<object>())
+                .Concat(filters.AuthorizationFilters.Cast<object>())
                 .Concat(filters.ExceptionFilters.Cast<object>())
                 .Concat(filters.ActionFilters.Cast<object>())
                 .Concat(filters.ResultFilters.Cast<object>())
