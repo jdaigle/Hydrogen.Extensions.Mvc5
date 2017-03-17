@@ -10,6 +10,11 @@ namespace MvcAsync
 {
     public class ControllerActionInvokerExTest
     {
+        public ControllerActionInvokerExTest()
+        {
+            GlobalFilters.Filters.Clear();
+        }
+
         [Fact]
         public void InvokeAction_ThrowsIfActionNameIsEmpty()
         {
@@ -107,10 +112,8 @@ namespace MvcAsync
         {
             var controllerContext = GetControllerContext();
 
-            // Act
             var retVal = InvokeAction(controllerContext, nameof(TestController.AuthorizationFilterShortCircuits), null, null);
 
-            // Assert
             Assert.True(retVal);
             Assert.Equal("From authorization filter", ((TestController)controllerContext.Controller).Log);
         }
@@ -120,10 +123,8 @@ namespace MvcAsync
         {
             var controllerContext = GetControllerContext();
 
-            // Act
             var retVal = InvokeAction(controllerContext, nameof(TestController.AsyncAuthorizationFilterShortCircuits), null, null);
 
-            // Assert
             Assert.True(retVal);
             Assert.Equal("From authorization filter", ((TestController)controllerContext.Controller).Log);
         }
@@ -216,6 +217,54 @@ namespace MvcAsync
             {
                 InvokeAction(controllerContext, nameof(TestController.ResultCallsThreadAbort), null, null);
             });
+        }
+
+        [Fact]
+        public void InvokeAction_ActionFilter_OnActionExecuting_ShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+            GlobalFilters.Filters.Add(new ActionFilterOnActionExecutingShortCircuits());
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.NormalAction), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal($"Called from {nameof(ActionFilterOnActionExecutingShortCircuits)}.{nameof(ActionFilterOnActionExecutingShortCircuits.OnActionExecuting)}", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AsyncActionFilter_OnActionExecuting_ShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+            GlobalFilters.Filters.Add(new AsyncActionFilterOnActionExecutingShortCircuits());
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.NormalAction), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal($"Called from {nameof(AsyncActionFilterOnActionExecutingShortCircuits)}.{nameof(AsyncActionFilterOnActionExecutingShortCircuits.OnActionExecutionAsync)} before next", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ActionFilter_OnActionExecuted_ShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+            GlobalFilters.Filters.Add(new ActionFilterOnActionExecutedShortCircuits());
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.NormalAction), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal($"Called from {nameof(ActionFilterOnActionExecutedShortCircuits)}.{nameof(ActionFilterOnActionExecutedShortCircuits.OnActionExecuted)}", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AsyncActionFilter_OnActionExecuted_ShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+            GlobalFilters.Filters.Add(new AsyncActionFilterOnActionExecutedShortCircuits());
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.NormalAction), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal($"Called from {nameof(AsyncActionFilterOnActionExecutedShortCircuits)}.{nameof(AsyncActionFilterOnActionExecutedShortCircuits.OnActionExecutionAsync)} after next", ((TestController)controllerContext.Controller).Log);
         }
 
         private static bool InvokeAction(ControllerContext controllerContext, string actionName, AsyncCallback callback, object state)
@@ -435,6 +484,68 @@ namespace MvcAsync
             public override void ExecuteResult(ControllerContext context)
             {
                 Thread.CurrentThread.Abort();
+            }
+        }
+
+        private class ActionFilterOnActionExecutingShortCircuits : IActionFilter
+        {
+            public void OnActionExecuting(ActionExecutingContext filterContext)
+            {
+                filterContext.Result = new LoggingActionResult($"Called from {nameof(ActionFilterOnActionExecutingShortCircuits)}.{nameof(ActionFilterOnActionExecutingShortCircuits.OnActionExecuting)}");
+            }
+
+            public void OnActionExecuted(ActionExecutedContext filterContext)
+            {
+            }
+        }
+
+        private class AsyncActionFilterOnActionExecutingShortCircuits : IAsyncActionFilter
+        {
+            public void OnActionExecuting(ActionExecutingContext filterContext)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void OnActionExecuted(ActionExecutedContext filterContext)
+            {
+                throw new NotSupportedException();
+            }
+
+            public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+            {
+                context.Result = new LoggingActionResult($"Called from {nameof(AsyncActionFilterOnActionExecutingShortCircuits)}.{nameof(AsyncActionFilterOnActionExecutingShortCircuits.OnActionExecutionAsync)} before next");
+                return Task.CompletedTask;
+            }
+        }
+
+        private class ActionFilterOnActionExecutedShortCircuits : IActionFilter
+        {
+            public void OnActionExecuting(ActionExecutingContext filterContext)
+            {
+            }
+
+            public void OnActionExecuted(ActionExecutedContext filterContext)
+            {
+                filterContext.Result = new LoggingActionResult($"Called from {nameof(ActionFilterOnActionExecutedShortCircuits)}.{nameof(ActionFilterOnActionExecutedShortCircuits.OnActionExecuted)}");
+            }
+        }
+
+        private class AsyncActionFilterOnActionExecutedShortCircuits : IAsyncActionFilter
+        {
+            public void OnActionExecuting(ActionExecutingContext filterContext)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void OnActionExecuted(ActionExecutedContext filterContext)
+            {
+                throw new NotSupportedException();
+            }
+
+            public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+            {
+                var actionExecutedContext = await next();
+                actionExecutedContext.Result = new LoggingActionResult($"Called from {nameof(AsyncActionFilterOnActionExecutedShortCircuits)}.{nameof(AsyncActionFilterOnActionExecutedShortCircuits.OnActionExecutionAsync)} after next");
             }
         }
     }
