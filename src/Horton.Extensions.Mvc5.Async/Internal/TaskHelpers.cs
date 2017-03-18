@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Horton.Mvc5.Async.Internal
+namespace Horton.Extensions.Mvc5.Async.Internal
 {
     public static class TaskHelpers
     {

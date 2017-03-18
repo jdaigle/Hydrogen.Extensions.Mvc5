@@ -24,7 +24,7 @@
 using System;
 using System.Threading;
 
-namespace Horton.Mvc5.Async.Internal
+namespace Horton.Extensions.Mvc5.Async.Internal
 {
     public sealed class SynchronizationContextSwitcher : IDisposable
     {

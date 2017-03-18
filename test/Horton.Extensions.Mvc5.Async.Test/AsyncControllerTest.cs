@@ -7,7 +7,7 @@ using System.Web.Routing;
 using Moq;
 using Xunit;
 
-namespace Horton.Mvc5.Async
+namespace Horton.Extensions.Mvc5.Async
 {
     public class AsyncControllerTest
     {

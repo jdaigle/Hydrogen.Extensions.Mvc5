@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using Horton.Mvc5.Async.Internal;
+using Horton.Extensions.Mvc5.Async.Internal;
 
-namespace Horton.Mvc5.Async
+namespace Horton.Extensions.Mvc5.Async
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public class AsyncExceptionFilterAttribute : FilterAttribute, IAsyncExceptionFilter, IExceptionFilter

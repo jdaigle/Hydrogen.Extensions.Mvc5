@@ -2,7 +2,7 @@
 using System.Runtime.ExceptionServices;
 using System.Web.Mvc;
 
-namespace Horton.Mvc5.Async
+namespace Horton.Extensions.Mvc5.Async
 {
     public class ResultExecutedContextEx : ResultExecutedContext
     {

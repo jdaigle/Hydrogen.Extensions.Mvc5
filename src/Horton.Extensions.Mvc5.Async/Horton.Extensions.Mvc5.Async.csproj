@@ -3,7 +3,7 @@
     <PropertyGroup>
         <Description>Horton MVC5 Async Extensions</Description>
         <AssemblyTitle>Horton MVC5 Async Extensions</AssemblyTitle>
-        <AssemblyName>Horton.Mvc5.Async</AssemblyName>
+        <AssemblyName>Horton.Extensions.Mvc5.Async</AssemblyName>
         <PackageId>Horton.Mvc5.Async</PackageId>
         <VersionPrefix>1.0.0</VersionPrefix>
         <VersionSuffix>alpha</VersionSuffix>

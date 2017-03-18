@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Web.Mvc;
 
-namespace Horton.Mvc5.Async.Internal
+namespace Horton.Extensions.Mvc5.Async.Internal
 {
     public struct FilterCursor
     {
