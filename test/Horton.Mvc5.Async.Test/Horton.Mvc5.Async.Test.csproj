@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Horton.Mvc5.Async\Horton.Mvc5.Async.csproj" />
+        <ProjectReference Include="..\..\src\Horton.Mvc5.Async\Horton.Mvc5.Async.csproj" />
     </ItemGroup>
 
     <ItemGroup>

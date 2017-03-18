@@ -3,15 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcAsync", "MvcAsync\MvcAsync.csproj", "{40E2A15B-053D-427E-B2BA-5632BCC90B48}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcAsync", "src\MvcAsync\MvcAsync.csproj", "{40E2A15B-053D-427E-B2BA-5632BCC90B48}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAsync.Test", "MvcAsync.Test\MvcAsync.Test.csproj", "{D77E3255-F279-40B6-B96E-9E83400C308C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAsync.Test", "test\MvcAsync.Test\MvcAsync.Test.csproj", "{D77E3255-F279-40B6-B96E-9E83400C308C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAsync.Benchmark", "MvcAsync.Benchmark\MvcAsync.Benchmark.csproj", "{3AF96D38-CB70-4106-8219-8B75CFB2839C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAsync.Benchmark", "test\MvcAsync.Benchmark\MvcAsync.Benchmark.csproj", "{3AF96D38-CB70-4106-8219-8B75CFB2839C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horton.Mvc5.Async", "Horton.Mvc5.Async\Horton.Mvc5.Async.csproj", "{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horton.Mvc5.Async", "src\Horton.Mvc5.Async\Horton.Mvc5.Async.csproj", "{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horton.Mvc5.Async.Test", "Horton.Mvc5.Async.Test\Horton.Mvc5.Async.Test.csproj", "{F814A185-170A-4B0D-BAF2-115E1136D017}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Horton.Mvc5.Async.Test", "test\Horton.Mvc5.Async.Test\Horton.Mvc5.Async.Test.csproj", "{F814A185-170A-4B0D-BAF2-115E1136D017}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EB4B98EE-C37D-4836-89CA-6A8E4EB007AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{900FDE0F-E880-46F6-AE19-D0DCF588ED23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +46,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{40E2A15B-053D-427E-B2BA-5632BCC90B48} = {EB4B98EE-C37D-4836-89CA-6A8E4EB007AB}
+		{D77E3255-F279-40B6-B96E-9E83400C308C} = {900FDE0F-E880-46F6-AE19-D0DCF588ED23}
+		{3AF96D38-CB70-4106-8219-8B75CFB2839C} = {900FDE0F-E880-46F6-AE19-D0DCF588ED23}
+		{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA} = {EB4B98EE-C37D-4836-89CA-6A8E4EB007AB}
+		{F814A185-170A-4B0D-BAF2-115E1136D017} = {900FDE0F-E880-46F6-AE19-D0DCF588ED23}
 	EndGlobalSection
 EndGlobal
