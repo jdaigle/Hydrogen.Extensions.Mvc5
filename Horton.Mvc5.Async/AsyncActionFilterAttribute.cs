@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
-namespace MvcAsync
+namespace Horton.Mvc5.Async
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public class AsyncActionFilterAttribute : FilterAttribute, IAsyncActionFilter, IAsyncResultFilter

@@ -1,0 +1,8 @@
+The project has borrowed code from, or has been inspired by the following
+open source projects:
+
+* https://aspnetwebstack.codeplex.com (Microsoft)
+* https://github.com/aspnet/Mvc (Microsoft)
+* https://github.com/StephenCleary/AsyncEx (Stephen Cleary)
+
+With sincere thanks, <3
