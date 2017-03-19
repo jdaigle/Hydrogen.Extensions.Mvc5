@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <Description>Hydrogen MVC5 Async Extensions</Description>
-        <AssemblyTitle>Hydrogen MVC5 Async Extensions</AssemblyTitle>
+        <Description>Hydrogen Async Extensions for ASP.NET MVC 5</Description>
+        <AssemblyTitle>Hydrogen Async Extensions for ASP.NET MVC 5</AssemblyTitle>
         <AssemblyName>Hydrogen.Extensions.Mvc5.Async</AssemblyName>
         <PackageId>Hydrogen.Extensions.Mvc5.Async</PackageId>
         <VersionPrefix>1.0.0</VersionPrefix>
@@ -12,6 +12,10 @@
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
         <Authors>Joseph Daigle</Authors>
         <PackageTags>Async;AspNet;Mvc;AspNetMvc</PackageTags>
+        <PackageLicenseUrl>http://www.opensource.org/licenses/mit-license.php</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/jdaigle/Hydrogen.Extensions.Mvc5</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/jdaigle/Hydrogen.Extensions.Mvc5</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>
