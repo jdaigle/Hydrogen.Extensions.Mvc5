@@ -19,28 +19,28 @@ namespace Hydrogen.Extensions.Mvc5.Async
         [Fact]
         public void InvokeAction_ThrowsIfActionNameIsEmpty()
         {
-            AssertEx.ThrowsArgumentNullOrEmpty(() =>
+            Assert.Throws<ArgumentException>("actionName", () =>
             {
                 InvokeAction(new ControllerContext(), "", null, null);
-            }, "actionName");
+            });
         }
 
         [Fact]
         public void InvokeAction_ThrowsIfActionNameIsNull()
         {
-            AssertEx.ThrowsArgumentNullOrEmpty(() =>
+            Assert.Throws<ArgumentException>("actionName", () =>
             {
                 InvokeAction(new ControllerContext(), null, null, null);
-            }, "actionName");
+            });
         }
 
         [Fact]
         public void InvokeAction_ThrowsIfControllerContextIsNull()
         {
-            AssertEx.ThrowsArgumentNull(() =>
+            Assert.Throws<ArgumentNullException>("controllerContext", () =>
             {
                 InvokeAction(null, nameof(TestController.NormalAction), null, null);
-            }, "controllerContext");
+            });
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
         {
             var controllerContext = GetControllerContext();
 
-            AssertEx.Throws<ThreadAbortException>(() =>
+            Assert.Throws<ThreadAbortException>(() =>
             {
                 var retVal = InvokeAction(controllerContext, nameof(TestController.ActionCallsThreadAbort), null, null);
             });
@@ -159,7 +159,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
         {
             var controllerContext = GetControllerContext(passesRequestValidation: false);
 
-            AssertEx.Throws<HttpRequestValidationException>(() =>
+            Assert.Throws<HttpRequestValidationException>(() =>
             {
                 var retVal = InvokeAction(controllerContext, nameof(TestController.NormalAction), null, null);
             });
@@ -214,7 +214,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
         {
             var controllerContext = GetControllerContext();
 
-            AssertEx.Throws<ThreadAbortException>(() =>
+            Assert.Throws<ThreadAbortException>(() =>
             {
                 InvokeAction(controllerContext, nameof(TestController.ResultCallsThreadAbort), null, null);
             });
