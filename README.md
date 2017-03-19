@@ -4,6 +4,8 @@ Hydrogen Extensions for ASP.NET MVC 5
 Hydrogen.Extensions.Mvc5.Async
 ------------------------------
 
+**Get it on [NuGet](https://www.nuget.org/packages/Hydrogen.Extensions.Mvc5.Async).**
+
 Adds support for async filters (i.e. action filters, etc.) by implementing a custom `IAsyncActionInvoker`.
 
 **How to use:**

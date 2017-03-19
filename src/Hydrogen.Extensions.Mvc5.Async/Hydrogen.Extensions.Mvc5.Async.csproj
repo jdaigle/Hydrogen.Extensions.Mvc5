@@ -12,7 +12,7 @@
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
         <Authors>Joseph Daigle</Authors>
         <PackageTags>Async;AspNet;Mvc;AspNetMvc</PackageTags>
-        <PackageLicenseUrl>http://www.opensource.org/licenses/mit-license.php</PackageLicenseUrl>
+        <PackageLicenseUrl>https://www.nuget.org/packages/Hydrogen.Extensions.Mvc5.Async</PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/jdaigle/Hydrogen.Extensions.Mvc5</PackageProjectUrl>
         <RepositoryUrl>https://github.com/jdaigle/Hydrogen.Extensions.Mvc5</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
