@@ -138,7 +138,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Hydrogen.Extensions.Mvc5.Async\Hydrogen.Extensions.Mvc5.Async.csproj">
       <Project>{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}</Project>
-      <Name>Hydrogen.Mvc5.Async</Name>
+      <Name>Hydrogen.Extensions.Mvc5.Async</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
