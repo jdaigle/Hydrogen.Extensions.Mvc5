@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net452</TargetFramework>
-        <RootNamespace>Horton.Extensions.Mvc5.Async</RootNamespace>
+        <RootNamespace>Hydrogen.Extensions.Mvc5.Async</RootNamespace>
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
         <TreatSpecificWarningsAsErrors />
     </PropertyGroup>
@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Horton.Extensions.Mvc5.Async\Horton.Extensions.Mvc5.Async.csproj" />
+        <ProjectReference Include="..\..\src\Hydrogen.Extensions.Mvc5.Async\Hydrogen.Extensions.Mvc5.Async.csproj" />
     </ItemGroup>
 
     <ItemGroup>

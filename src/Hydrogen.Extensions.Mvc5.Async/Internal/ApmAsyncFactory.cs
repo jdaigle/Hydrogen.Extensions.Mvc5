@@ -24,7 +24,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Horton.Extensions.Mvc5.Async.Internal
+namespace Hydrogen.Extensions.Mvc5.Async.Internal
 {
     /// <summary>
     /// Creation methods for tasks wrapping the Asynchronous Programming Model (APM), and APM wrapper methods around tasks.

@@ -136,9 +136,9 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Horton.Extensions.Mvc5.Async\Horton.Extensions.Mvc5.Async.csproj">
+    <ProjectReference Include="..\..\src\Hydrogen.Extensions.Mvc5.Async\Hydrogen.Extensions.Mvc5.Async.csproj">
       <Project>{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}</Project>
-      <Name>Horton.Mvc5.Async</Name>
+      <Name>Hydrogen.Mvc5.Async</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

@@ -7,7 +7,7 @@ using System.Web.Mvc.Async;
 using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.Mvc;
-using Horton.Extensions.Mvc5.Async;
+using Hydrogen.Extensions.Mvc5.Async;
 
 namespace Sample.Web
 {

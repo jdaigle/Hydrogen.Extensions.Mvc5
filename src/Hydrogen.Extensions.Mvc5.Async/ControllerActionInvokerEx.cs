@@ -25,10 +25,10 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Async;
 using System.Web.Mvc.Routing;
-using Horton.Extensions.Mvc5.Async.Internal;
+using Hydrogen.Extensions.Mvc5.Async.Internal;
 using Microsoft.Web.Infrastructure.DynamicValidationHelper;
 
-namespace Horton.Extensions.Mvc5.Async
+namespace Hydrogen.Extensions.Mvc5.Async
 {
     public class ControllerActionInvokerEx : AsyncControllerActionInvoker, IAsyncActionInvoker
     {

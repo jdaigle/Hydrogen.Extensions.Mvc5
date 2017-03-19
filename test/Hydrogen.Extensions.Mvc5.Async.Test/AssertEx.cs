@@ -27,7 +27,7 @@ using System.Web;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Horton.Extensions.Mvc5.Async
+namespace Hydrogen.Extensions.Mvc5.Async
 {
     public partial class AssertEx
     {

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Web.Mvc;
 
-namespace Horton.Extensions.Mvc5.Async
+namespace Hydrogen.Extensions.Mvc5.Async
 {
     public delegate Task<ResultExecutedContext> ResultExecutionDelegate();
 }

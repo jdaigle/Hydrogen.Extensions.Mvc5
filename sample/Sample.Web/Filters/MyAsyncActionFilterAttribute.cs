@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Web.Mvc;
-using Horton.Extensions.Mvc5.Async;
+using Hydrogen.Extensions.Mvc5.Async;
 
 namespace Sample.Web.Filters
 {

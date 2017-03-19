@@ -3,11 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Horton.Extensions.Mvc5.Async.Internal;
+using Hydrogen.Extensions.Mvc5.Async.Internal;
 using Moq;
 using Xunit;
 
-namespace Horton.Extensions.Mvc5.Async
+namespace Hydrogen.Extensions.Mvc5.Async
 {
     public class ControllerActionInvokerExTest
     {
