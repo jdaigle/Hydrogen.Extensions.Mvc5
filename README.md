@@ -39,7 +39,9 @@ For example:
     {
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // Execute code before the action is invoked
+            // Execute code before the action is invoked.
+            // You can "short-circuit" the action by setting 'context.Result'
+            // and returning before calling 'next()'.
             
             // The implementation is responsible for calling 'next()'.
             var actionExecutedContext = await next().ConfigureAwait(false);
@@ -49,7 +51,9 @@ For example:
 
         public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
         {
-            // Execute code before the result is invoked
+            // Execute code before the result is invoked.
+            // You can "short-circuit" the action by setting 'context.Canceled = true'
+            // and returning before calling 'next()'.
             
             // The implementation is responsible for calling 'next()'.
             var resultExecutedContext = await next().ConfigureAwait(false);
