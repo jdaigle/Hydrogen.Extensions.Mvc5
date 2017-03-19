@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Mvc.Filters;
 using Hydrogen.Extensions.Mvc5.Async.Internal;
 using Moq;
 using Xunit;
@@ -106,6 +107,39 @@ namespace Hydrogen.Extensions.Mvc5.Async
             {
                 var retVal = InvokeAction(controllerContext, nameof(TestController.ActionCallsThreadAbort), null, null);
             });
+        }
+
+        [Fact]
+        public void InvokeAction_AuthenticationFilterShortCircuits()
+        {
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AuthenticationFilterShortCircuits), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AuthenticationFilterChallenges()
+        {
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AuthenticationFilterChallenges), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AuthenticationFilterShortCircuitsAndChallenges()
+        {
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AuthenticationFilterShortCircuitsAndChallenges), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
         }
 
         [Fact]
@@ -345,9 +379,29 @@ namespace Hydrogen.Extensions.Mvc5.Async
                 return null;
             }
 
-            [AuthorizationFilterReturnsResult]
-            public void AuthorizationFilterShortCircuits()
+            [AuthenticationFilterReturnsResult]
+            public Task AuthenticationFilterShortCircuits()
             {
+                return TaskHelpers.CompletedTask;
+            }
+
+            [AuthenticationFilterChallengeSetsResult]
+            public Task AuthenticationFilterChallenges()
+            {
+                return TaskHelpers.CompletedTask;
+            }
+
+            [AuthenticationFilterReturnsResult]
+            [AuthenticationFilterChallengeSetsResult]
+            public Task AuthenticationFilterShortCircuitsAndChallenges()
+            {
+                return TaskHelpers.CompletedTask;
+            }
+
+            [AuthorizationFilterReturnsResult]
+            public Task AuthorizationFilterShortCircuits()
+            {
+                return TaskHelpers.CompletedTask;
             }
 
             [AsyncAuthorizationFilterReturnsResult]
@@ -388,6 +442,30 @@ namespace Hydrogen.Extensions.Mvc5.Async
             public ActionResult ResultCallsThreadAbort()
             {
                 return new ActionResultWhichCallsThreadAbort();
+            }
+        }
+
+        private class AuthenticationFilterReturnsResultAttribute : FilterAttribute, IAuthenticationFilter
+        {
+            public void OnAuthentication(AuthenticationContext filterContext)
+            {
+                filterContext.Result = new LoggingActionResult("From authentication filter");
+            }
+
+            public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+            {
+            }
+        }
+
+        private class AuthenticationFilterChallengeSetsResultAttribute : FilterAttribute, IAuthenticationFilter
+        {
+            public void OnAuthentication(AuthenticationContext filterContext)
+            {
+            }
+
+            public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+            {
+                filterContext.Result = new LoggingActionResult("From authentication filter challenge");
             }
         }
 

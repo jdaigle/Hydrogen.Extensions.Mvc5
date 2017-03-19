@@ -19,10 +19,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Async;
+using System.Web.Mvc.Filters;
 using System.Web.Mvc.Routing;
 using Hydrogen.Extensions.Mvc5.Async.Internal;
 using Microsoft.Web.Infrastructure.DynamicValidationHelper;
@@ -84,6 +86,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
         private readonly ActionDescriptor _actionDescriptor;
         private IDictionary<string, object> _parameters;
 
+        private AuthenticationContext _authenticationContext;
         private AuthorizationContext _authorizationContext;
 
         private ExceptionContextEx _exceptionContext;
@@ -140,6 +143,66 @@ namespace Hydrogen.Extensions.Mvc5.Async
             switch (next)
             {
                 case State.InvokeBegin:
+                    {
+                        goto case State.AuthenticationBegin;
+                    }
+
+                case State.AuthenticationBegin:
+                    {
+                        _cursor.Reset();
+                        goto case State.AuthenticationNext;
+                    }
+
+                case State.AuthenticationNext:
+                    {
+                        var current = _cursor.GetNextFilter<IAuthenticationFilter, IAuthenticationFilter>();
+                        if (current.Filter != null)
+                        {
+                            var originalPrincipal = _controllerContext.HttpContext.User;
+                            _authenticationContext = new AuthenticationContext(_controllerContext, _actionDescriptor, originalPrincipal);
+                            state = current.Filter;
+                            goto case State.AuthenticationSync;
+                        }
+                        else
+                        {
+                            goto case State.AuthenticationEnd;
+                        }
+                    }
+
+                case State.AuthenticationSync:
+                    {
+                        var filter = (IAuthenticationFilter)state;
+                        var authenticationContext = _authenticationContext;
+
+                        filter.OnAuthentication(authenticationContext);
+
+                        if (authenticationContext.Result != null)
+                        {
+                            goto case State.AuthenticationShortCircuit;
+                        }
+
+                        var originalPrincipal = _controllerContext.HttpContext.User;
+                        var newPrincipal = authenticationContext.Principal;
+
+                        if (newPrincipal != originalPrincipal)
+                        {
+                            Debug.Assert(_controllerContext.HttpContext != null);
+                            _controllerContext.HttpContext.User = newPrincipal;
+                            Thread.CurrentPrincipal = newPrincipal;
+                        }
+
+                        goto case State.AuthenticationNext;
+                    }
+
+                case State.AuthenticationShortCircuit:
+                    {
+                        // If an Authentication filter short circuits, the result is the last thing we execute
+                        isCompleted = true;
+                        InvokeActionResult(_controllerContext, _authenticationContext.Result);
+                        goto case State.InvokeEnd;
+                    }
+
+                case State.AuthenticationEnd:
                     {
                         goto case State.AuthorizationBegin;
                     }
@@ -985,6 +1048,12 @@ namespace Hydrogen.Extensions.Mvc5.Async
         private enum State
         {
             InvokeBegin,
+
+            AuthenticationBegin,
+            AuthenticationNext,
+            AuthenticationSync,
+            AuthenticationShortCircuit,
+            AuthenticationEnd,
 
             AuthorizationBegin,
             AuthorizationNext,
