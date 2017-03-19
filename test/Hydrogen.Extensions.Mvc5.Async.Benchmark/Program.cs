@@ -2,13 +2,12 @@
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 
-namespace MvcAsync.Benchmark
+namespace Hydrogen.Extensions.Mvc5.Async.Benchmark
 {
     class Program
     {
         static void Main(string[] args)
         {
-            //BenchmarkRunner.Run<AsyncControllerBenchmark>();
             BenchmarkRunner.Run<AsyncControllerActionInvokerBenchmark>();
         }
     }
@@ -17,7 +16,7 @@ namespace MvcAsync.Benchmark
     {
         public Config()
         {
-            Add(new MemoryDiagnoser());
+            //Add(new MemoryDiagnoser());
             //Add(new InliningDiagnoser());
         }
     }

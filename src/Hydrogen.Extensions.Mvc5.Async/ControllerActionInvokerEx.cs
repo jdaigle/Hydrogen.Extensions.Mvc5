@@ -32,6 +32,8 @@ namespace Hydrogen.Extensions.Mvc5.Async
 {
     public class ControllerActionInvokerEx : AsyncControllerActionInvoker, IAsyncActionInvoker
     {
+        public static readonly ControllerActionInvokerEx Instance = new ControllerActionInvokerEx();
+
         private static readonly Task<bool> _cachedTaskFromResultFalse = Task.FromResult(false);
 
         public Task<bool> InvokeActionAsync(ControllerContext controllerContext, string actionName)
