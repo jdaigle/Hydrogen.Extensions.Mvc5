@@ -36,6 +36,8 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
         private static readonly Task<bool> _cachedTaskFromResultFalse = Task.FromResult(false);
 
+        private Func<ControllerContext, ActionDescriptor, IEnumerable<Filter>> _getFiltersThunk = FilterProviders.Providers.GetFilters;
+
         public Task<bool> InvokeActionAsync(ControllerContext controllerContext, string actionName)
         {
             if (controllerContext == null)
@@ -56,10 +58,10 @@ namespace Hydrogen.Extensions.Mvc5.Async
                 return _cachedTaskFromResultFalse;
             }
 
-            var filterInfo = GetFilters(controllerContext, actionDescriptor);
 
             var parameters = GetParameterValues(controllerContext, actionDescriptor);
-            var invokerInternal = new ControllerActionInvokerInternal(controllerContext, actionDescriptor, parameters, filterInfo);
+            var filters = _getFiltersThunk(controllerContext, actionDescriptor);
+            var invokerInternal = new ControllerActionInvokerInternal(controllerContext, actionDescriptor, parameters, filters);
 
             return invokerInternal.InvokeFilterPipelineAsync();
         }
@@ -102,20 +104,12 @@ namespace Hydrogen.Extensions.Mvc5.Async
             ControllerContext controllerContext,
             ActionDescriptor actionDescriptor,
             IDictionary<string, object> parameters,
-            FilterInfo filters)
+            IEnumerable<Filter> filters)
         {
             _controllerContext = controllerContext;
             _actionDescriptor = actionDescriptor;
             _parameters = parameters;
-
-            // TODO: this is a nasty little hack to get around how MVC splits up the filters
-            _cursor = new FilterCursor(
-                        filters.AuthenticationFilters.Cast<object>()
-                .Concat(filters.AuthorizationFilters.Cast<object>())
-                .Concat(filters.ExceptionFilters.Cast<object>())
-                .Concat(filters.ActionFilters.Cast<object>())
-                .Concat(filters.ResultFilters.Cast<object>())
-                .ToList());
+            _cursor = new FilterCursor(filters);
         }
 
         public async Task<bool> InvokeFilterPipelineAsync()
