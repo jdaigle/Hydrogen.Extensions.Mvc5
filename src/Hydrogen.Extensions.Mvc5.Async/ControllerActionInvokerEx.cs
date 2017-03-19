@@ -87,6 +87,9 @@ namespace Hydrogen.Extensions.Mvc5.Async
         private IDictionary<string, object> _parameters;
 
         private AuthenticationContext _authenticationContext;
+        private AuthenticationChallengeContext _authenticationChallengeContext;
+        private bool authenticationChallengeBypassResultFilters = false;
+
         private AuthorizationContext _authorizationContext;
 
         private ExceptionContextEx _exceptionContext;
@@ -196,15 +199,69 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
                 case State.AuthenticationShortCircuit:
                     {
-                        // If an Authentication filter short circuits, the result is the last thing we execute
-                        isCompleted = true;
-                        InvokeActionResult(_controllerContext, _authenticationContext.Result);
-                        goto case State.InvokeEnd;
+                        Debug.Assert(_authenticationContext?.Result != null);
+                        _result = _authenticationContext.Result;
+                        authenticationChallengeBypassResultFilters = true;
+                        goto case State.AuthenticationChallengeBegin;
                     }
 
                 case State.AuthenticationEnd:
                     {
                         goto case State.AuthorizationBegin;
+                    }
+
+                case State.AuthenticationChallengeBegin:
+                    {
+                        _cursor.Reset();
+                        goto case State.AuthenticationChallengeNext;
+                    }
+
+                case State.AuthenticationChallengeNext:
+                    {
+                        var current = _cursor.GetNextFilter<IAuthenticationFilter, IAuthenticationFilter>();
+                        if (current.Filter != null)
+                        {
+                            Debug.Assert(_result != null);
+                            _authenticationChallengeContext = new AuthenticationChallengeContext(_controllerContext, _actionDescriptor, _result);
+                            state = current.Filter;
+                            goto case State.AuthenticationChallengeSync;
+                        }
+                        else
+                        {
+                            goto case State.AuthenticationChallengeEnd;
+                        }
+                    }
+
+                case State.AuthenticationChallengeSync:
+                    {
+                        Debug.Assert(_authenticationChallengeContext != null);
+
+                        var filter = (IAuthenticationFilter)state;
+                        var authenticationChallengeContext = _authenticationChallengeContext;
+
+                        filter.OnAuthenticationChallenge(authenticationChallengeContext);
+
+                        // unlike other filter types, don't short-circuit evaluation when context.Result != null (since it
+                        // starts out that way, and multiple filters may add challenges to the result)
+                        _result = authenticationChallengeContext.Result ?? _result;
+
+                        goto case State.AuthenticationChallengeNext;
+                    }
+
+                case State.AuthenticationChallengeEnd:
+                    {
+                        Debug.Assert(_result != null);
+
+                        if (authenticationChallengeBypassResultFilters)
+                        {
+                            // short-circuit before we started invoking the action itself
+                            // so bypass any result filters
+                            isCompleted = true;
+                            InvokeActionResult(_controllerContext, _result);
+                            goto case State.InvokeEnd;
+                        }
+
+                        goto case State.ResultBegin;
                     }
 
                 case State.AuthorizationBegin:
@@ -293,10 +350,10 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
                 case State.AuthorizationShortCircuit:
                     {
-                        // If an authorization filter short circuits, the result is the last thing we execute
-                        isCompleted = true;
-                        InvokeActionResult(_controllerContext, _authorizationContext.Result);
-                        goto case State.InvokeEnd;
+                        Debug.Assert(_authorizationContext?.Result != null);
+                        _result = _authorizationContext.Result;
+                        authenticationChallengeBypassResultFilters = true;
+                        goto case State.AuthenticationChallengeBegin;
                     }
 
                 case State.AuthorizationEnd:
@@ -455,12 +512,6 @@ namespace Hydrogen.Extensions.Mvc5.Async
                         }
 
                         InvokeActionResult(_controllerContext, _result);
-                        //var task = InvokeResultAsync(_exceptionContext.Result);
-                        //if (task.Status != TaskStatus.RanToCompletion)
-                        //{
-                        //    next = State.ResourceInsideEnd;
-                        //    return task;
-                        //}
 
                         goto case State.InvokeEnd;
                     }
@@ -648,7 +699,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
                             _result = actionExecutedContext.Result;
                         }
 
-                        goto case State.ResultBegin;
+                        goto case State.AuthenticationChallengeBegin;
                     }
 
                 case State.ResultBegin:
@@ -779,12 +830,6 @@ namespace Hydrogen.Extensions.Mvc5.Async
                         }
 
                         InvokeActionResult(_controllerContext, _result);
-                        //var task = InvokeResultAsync(_result);
-                        //if (task.Status != TaskStatus.RanToCompletion)
-                        //{
-                        //    next = State.ResultEnd;
-                        //    return task;
-                        //}
 
                         goto case State.ResultEnd;
                     }
@@ -1054,6 +1099,11 @@ namespace Hydrogen.Extensions.Mvc5.Async
             AuthenticationSync,
             AuthenticationShortCircuit,
             AuthenticationEnd,
+
+            AuthenticationChallengeBegin,
+            AuthenticationChallengeNext,
+            AuthenticationChallengeSync,
+            AuthenticationChallengeEnd,
 
             AuthorizationBegin,
             AuthorizationNext,
