@@ -8,11 +8,16 @@ namespace Hydrogen.Extensions.Mvc5.Async.Internal
     {
         private OverrideFilterInfo _filterInfo;
         private int _index;
+        private List<IAuthenticationFilter> _authenticationFilters;
+
+        public List<IAuthenticationFilter> AuthenticationFilters => _authenticationFilters;
 
         public FilterCursor(IEnumerable<Filter> filters)
         {
             _filterInfo = ProcessOverrideFilters(filters);
             _index = 0;
+            _authenticationFilters = new List<IAuthenticationFilter>();
+            SplitFilters(this, _filterInfo);
         }
 
         public void Reset()
@@ -57,10 +62,6 @@ namespace Hydrogen.Extensions.Mvc5.Async.Internal
             {
                 return true;
             }
-            if (filter is IAuthenticationFilter && filter.Scope < _filterInfo.AuthenticationOverrideScope)
-            {
-                return true;
-            }
             if (filter is IAuthorizationFilter && filter.Scope < _filterInfo.AuthorizationOverrideScope)
             {
                 return true;
@@ -71,6 +72,17 @@ namespace Hydrogen.Extensions.Mvc5.Async.Internal
             }
 
             return false;
+        }
+
+        private static void SplitFilters(FilterCursor filterInfo, OverrideFilterInfo overrideFilterInfo)
+        {
+            foreach (var filter in overrideFilterInfo.Filters)
+            {
+                if (filter.Instance is IAuthenticationFilter authenticationFilter && filter.Scope >= overrideFilterInfo.AuthenticationOverrideScope)
+                {
+                    filterInfo._authenticationFilters.Add(authenticationFilter);
+                }
+            }
         }
 
         private static OverrideFilterInfo ProcessOverrideFilters(IEnumerable<Filter> filters)

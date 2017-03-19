@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -81,6 +82,7 @@ namespace Hydrogen.Extensions.Mvc5.Async.Benchmark
             Mock<HttpRequestBase> mockHttpRequest = new Mock<HttpRequestBase>();
             Mock<HttpContextBase> mockHttpContext = new Mock<HttpContextBase>();
             mockHttpContext.SetupGet(t => t.Request).Returns(mockHttpRequest.Object);
+            mockHttpContext.SetupGet(t => t.User).Returns(new GenericPrincipal(new GenericIdentity("Foo"), new string[0]));
             RouteData routeData = new RouteData();
             if (actionName != null)
             {
