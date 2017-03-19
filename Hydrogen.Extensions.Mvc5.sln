@@ -21,6 +21,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Web", "sample\Sample
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hydrogen.Extensions.Mvc5.Async.Benchmark", "test\Hydrogen.Extensions.Mvc5.Async.Benchmark\Hydrogen.Extensions.Mvc5.Async.Benchmark.csproj", "{855B06DF-C932-43CD-A928-4C9267BE7DDC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{80E78849-F840-4B39-A9CF-E24C0D6616B2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		ACKNOWLEDGEMENTS.txt = ACKNOWLEDGEMENTS.txt
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
