@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAsync", "src\MvcAsync\MvcAsync.csproj", "{40E2A15B-053D-427E-B2BA-5632BCC90B48}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcAsync.Test", "test\MvcAsync.Test\MvcAsync.Test.csproj", "{D77E3255-F279-40B6-B96E-9E83400C308C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hydrogen.Extensions.Mvc5.Async", "src\Hydrogen.Extensions.Mvc5.Async\Hydrogen.Extensions.Mvc5.Async.csproj", "{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hydrogen.Extensions.Mvc5.Async.Test", "test\Hydrogen.Extensions.Mvc5.Async.Test\Hydrogen.Extensions.Mvc5.Async.Test.csproj", "{F814A185-170A-4B0D-BAF2-115E1136D017}"
@@ -35,14 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{40E2A15B-053D-427E-B2BA-5632BCC90B48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40E2A15B-053D-427E-B2BA-5632BCC90B48}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40E2A15B-053D-427E-B2BA-5632BCC90B48}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40E2A15B-053D-427E-B2BA-5632BCC90B48}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D77E3255-F279-40B6-B96E-9E83400C308C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D77E3255-F279-40B6-B96E-9E83400C308C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D77E3255-F279-40B6-B96E-9E83400C308C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D77E3255-F279-40B6-B96E-9E83400C308C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -64,8 +52,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{40E2A15B-053D-427E-B2BA-5632BCC90B48} = {EB4B98EE-C37D-4836-89CA-6A8E4EB007AB}
-		{D77E3255-F279-40B6-B96E-9E83400C308C} = {900FDE0F-E880-46F6-AE19-D0DCF588ED23}
 		{E2324B8C-ECC6-4392-9DF7-F9D5C6FD33CA} = {EB4B98EE-C37D-4836-89CA-6A8E4EB007AB}
 		{F814A185-170A-4B0D-BAF2-115E1136D017} = {900FDE0F-E880-46F6-AE19-D0DCF588ED23}
 		{26AE2F7B-077A-4872-9DE6-CAB0FCA6C997} = {5147D50A-5A99-454E-B04A-B5BF96A455DC}
