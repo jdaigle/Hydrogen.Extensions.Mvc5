@@ -99,6 +99,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
         private ResultExecutingContext _resultExecutingContext;
         private ResultExecutedContextEx _resultExecutedContext;
+        private bool resultExecuted = false;
 
         // Do not make this readonly, it's mutable. We don't want to make a copy.
         // https://blogs.msdn.microsoft.com/ericlippert/2008/05/14/mutating-readonly-structs/
@@ -258,6 +259,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
                             // so bypass any result filters
                             isCompleted = true;
                             InvokeActionResult(_controllerContext, _result);
+                            resultExecuted = true;
                             goto case State.InvokeEnd;
                         }
 
@@ -512,6 +514,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
                         }
 
                         InvokeActionResult(_controllerContext, _result);
+                        resultExecuted = true;
 
                         goto case State.InvokeEnd;
                     }
@@ -536,6 +539,14 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
                             Rethrow(exceptionContext);
                             Debug.Fail("unreachable");
+                        }
+
+                        if (resultExecuted)
+                        {
+                            // MVC5 wraps the result in the Exception filter scope
+                            // MVC Core does not
+                            // This flag indicates what to do at this point after we unwrap from invoking the action
+                            goto case State.InvokeEnd;
                         }
 
                         goto case State.ResultBegin;
@@ -830,6 +841,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
                         }
 
                         InvokeActionResult(_controllerContext, _result);
+                        resultExecuted = true;
 
                         goto case State.ResultEnd;
                     }

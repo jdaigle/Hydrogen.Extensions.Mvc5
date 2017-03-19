@@ -132,6 +132,17 @@ namespace Hydrogen.Extensions.Mvc5.Async
         }
 
         [Fact]
+        public void InvokeAction_AuthenticationFilterChallengesWithResultFilter()
+        {
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.InvokeAction_AuthenticationFilterChallengesWithResultFilter), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge with result filter", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
         public void InvokeAction_AuthenticationFilterShortCircuitsAndChallenges()
         {
             var controllerContext = GetControllerContext();
@@ -162,6 +173,28 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
             Assert.True(retVal);
             Assert.Equal("From authorization filter", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AuthorizationFilterShortCircuitsAndChallenges()
+        {
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AuthorizationFilterShortCircuitsAndChallenges), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_AsyncAuthorizationFilterShortCircuitsAndChallenges()
+        {
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.AsyncAuthorizationFilterShortCircuitsAndChallenges), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal("From authentication filter challenge", ((TestController)controllerContext.Controller).Log);
         }
 
         [Fact]
@@ -391,6 +424,13 @@ namespace Hydrogen.Extensions.Mvc5.Async
                 return TaskHelpers.CompletedTask;
             }
 
+            [AuthenticationFilterChallengeSetsResult]
+            [ResultFilterMutatesResult]
+            public Task InvokeAction_AuthenticationFilterChallengesWithResultFilter()
+            {
+                return TaskHelpers.CompletedTask;
+            }
+
             [AuthenticationFilterReturnsResult]
             [AuthenticationFilterChallengeSetsResult]
             public Task AuthenticationFilterShortCircuitsAndChallenges()
@@ -406,6 +446,19 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
             [AsyncAuthorizationFilterReturnsResult]
             public Task AsyncAuthorizationFilterShortCircuits()
+            {
+                return TaskHelpers.CompletedTask;
+            }
+
+            [AuthenticationFilterChallengeSetsResult]
+            [AuthorizationFilterReturnsResult]
+            public Task AuthorizationFilterShortCircuitsAndChallenges()
+            {
+                return TaskHelpers.CompletedTask;
+            }
+            [AuthenticationFilterChallengeSetsResult]
+            [AsyncAuthorizationFilterReturnsResult]
+            public Task AsyncAuthorizationFilterShortCircuitsAndChallenges()
             {
                 return TaskHelpers.CompletedTask;
             }
@@ -442,6 +495,18 @@ namespace Hydrogen.Extensions.Mvc5.Async
             public ActionResult ResultCallsThreadAbort()
             {
                 return new ActionResultWhichCallsThreadAbort();
+            }
+        }
+
+        private class ResultFilterMutatesResultAttribute : FilterAttribute, IResultFilter
+        {
+            public void OnResultExecuting(ResultExecutingContext filterContext)
+            {
+                (filterContext.Result as LoggingActionResult).LogText += " with result filter";
+            }
+
+            public void OnResultExecuted(ResultExecutedContext filterContext)
+            {
             }
         }
 
@@ -537,16 +602,16 @@ namespace Hydrogen.Extensions.Mvc5.Async
 
         private class LoggingActionResult : ActionResult
         {
-            private readonly string _logText;
-
             public LoggingActionResult(string logText)
             {
-                _logText = logText;
+                LogText = logText;
             }
+
+            public string LogText { get; set; }
 
             public override void ExecuteResult(ControllerContext context)
             {
-                ((TestController)context.Controller).Log = _logText;
+                ((TestController)context.Controller).Log = LogText;
             }
         }
 
