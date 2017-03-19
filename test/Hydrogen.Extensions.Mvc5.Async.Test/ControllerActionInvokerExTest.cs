@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -335,6 +336,298 @@ namespace Hydrogen.Extensions.Mvc5.Async
             Assert.Equal($"Called from {nameof(AsyncActionFilterOnActionExecutedShortCircuits)}.{nameof(AsyncActionFilterOnActionExecutedShortCircuits.OnActionExecutionAsync)} after next", ((TestController)controllerContext.Controller).Log);
         }
 
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_Handled()
+        {
+            var actionLog = new List<string>();
+            var actionFilter = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted");
+                    Assert.Equal("Some exception text.", filterContext.Exception.Message);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = new LoggingActionResult("Handled Exception");
+                }
+            };
+            GlobalFilters.Filters.Add(actionFilter);
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal(new[] {
+                "OnActionExecuting",
+                "OnActionExecuted" }, actionLog.ToArray());
+            Assert.Equal("Handled Exception", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_HandledAsync()
+        {
+            var actionLog = new List<string>();
+            var actionFilter = new AsyncActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted");
+                    Assert.Equal("Some exception text.", filterContext.Exception.Message);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = new LoggingActionResult("Handled Exception");
+                }
+            };
+            GlobalFilters.Filters.Add(actionFilter);
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal(new[] {
+                "OnActionExecuting",
+                "OnActionExecuted" }, actionLog.ToArray());
+            Assert.Equal("Handled Exception", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_HandledByEarlier()
+        {
+            var actionLog = new List<string>();
+            var filter1 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting1");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted1");
+                    Assert.Equal("Some exception text.", filterContext.Exception.Message);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = new LoggingActionResult("Handled Exception");
+                }
+            };
+            var filter2 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting2");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted2");
+                }
+            };
+            GlobalFilters.Filters.Add(filter1);
+            GlobalFilters.Filters.Add(filter2);
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal(new[] {
+                "OnActionExecuting1",
+                "OnActionExecuting2",
+                "OnActionExecuted2",
+                "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal("Handled Exception", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_HandledByEarlierAsync()
+        {
+            var actionLog = new List<string>();
+            var filter1 = new AsyncActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting1");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted1");
+                    Assert.Equal("Some exception text.", filterContext.Exception.Message);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = new LoggingActionResult("Handled Exception");
+                }
+            };
+            var filter2 = new AsyncActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting2");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted2");
+                }
+            };
+            GlobalFilters.Filters.Add(filter1);
+            GlobalFilters.Filters.Add(filter2);
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal(new[] {
+                "OnActionExecuting1",
+                "OnActionExecuting2",
+                "OnActionExecuted2",
+                "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal("Handled Exception", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_HandledByLater()
+        {
+            var actionLog = new List<string>();
+            var filter1 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting1");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted1");
+                    }
+            };
+            var filter2 = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting2");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted2");
+                    Assert.Equal("Some exception text.", filterContext.Exception.Message);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = new LoggingActionResult("Handled Exception");
+                }
+            };
+            GlobalFilters.Filters.Add(filter1);
+            GlobalFilters.Filters.Add(filter2);
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal(new[] {
+                "OnActionExecuting1",
+                "OnActionExecuting2",
+                "OnActionExecuted2",
+                "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal("Handled Exception", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_HandledByLaterAsync()
+        {
+            var actionLog = new List<string>();
+            var filter1 = new AsyncActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting1");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted1");
+                }
+            };
+            var filter2 = new AsyncActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting2");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted2");
+                    Assert.Equal("Some exception text.", filterContext.Exception.Message);
+                    filterContext.ExceptionHandled = true;
+                    filterContext.Result = new LoggingActionResult("Handled Exception");
+                }
+            };
+            GlobalFilters.Filters.Add(filter1);
+            GlobalFilters.Filters.Add(filter2);
+            var controllerContext = GetControllerContext();
+
+            var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+
+            Assert.True(retVal);
+            Assert.Equal(new[] {
+                "OnActionExecuting1",
+                "OnActionExecuting2",
+                "OnActionExecuted2",
+                "OnActionExecuted1" }, actionLog.ToArray());
+            Assert.Equal("Handled Exception", ((TestController)controllerContext.Controller).Log);
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_NotHandled()
+        {
+            var actionLog = new List<string>();
+            var actionFilter = new ActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting1");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted1");
+                }
+            };
+            GlobalFilters.Filters.Add(actionFilter);
+            var controllerContext = GetControllerContext();
+
+            AssertEx.Throws<Exception>(() =>
+            {
+                var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+            }, "Some exception text.");
+
+            Assert.Equal(new[] {
+                "OnActionExecuting1",
+                "OnActionExecuted1" }, actionLog.ToArray());
+        }
+
+        [Fact]
+        public void InvokeAction_ThrowsOnActionExecutingException_NotHandledAsync()
+        {
+            var actionLog = new List<string>();
+            var actionFilter = new AsyncActionFilterImpl()
+            {
+                OnActionExecutingImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuting1");
+                },
+                OnActionExecutedImpl = filterContext =>
+                {
+                    actionLog.Add("OnActionExecuted1");
+                }
+            };
+            GlobalFilters.Filters.Add(actionFilter);
+            var controllerContext = GetControllerContext();
+
+            AssertEx.Throws<Exception>(() =>
+            {
+                var retVal = InvokeAction(controllerContext, nameof(TestController.ActionThrowsExceptionAndIsNotHandled), null, null);
+            }, "Some exception text.");
+
+            Assert.Equal(new[] {
+                "OnActionExecuting1",
+                "OnActionExecuted1" }, actionLog.ToArray());
+        }
+
         private static bool InvokeAction(ControllerContext controllerContext, string actionName, AsyncCallback callback, object state)
         {
             try
@@ -400,6 +693,7 @@ namespace Hydrogen.Extensions.Mvc5.Async
             {
                 throw new Exception("Some exception text.");
             }
+
             [CustomAsyncExceptionFilterDoesNotHandleError]
             public Task ActionThrowsExceptionAndIsNotHandledAsync()
             {
@@ -690,6 +984,86 @@ namespace Hydrogen.Extensions.Mvc5.Async
             {
                 var actionExecutedContext = await next();
                 actionExecutedContext.Result = new LoggingActionResult($"Called from {nameof(AsyncActionFilterOnActionExecutedShortCircuits)}.{nameof(AsyncActionFilterOnActionExecutedShortCircuits.OnActionExecutionAsync)} after next");
+            }
+        }
+
+        private class ActionFilterImpl : IActionFilter, IResultFilter
+        {
+            public Action<ActionExecutingContext> OnActionExecutingImpl { get; set; }
+
+            public void OnActionExecuting(ActionExecutingContext filterContext)
+            {
+                OnActionExecutingImpl?.Invoke(filterContext);
+            }
+
+            public Action<ActionExecutedContext> OnActionExecutedImpl { get; set; }
+
+            public void OnActionExecuted(ActionExecutedContext filterContext)
+            {
+                OnActionExecutedImpl?.Invoke(filterContext);
+            }
+
+            public Action<ResultExecutingContext> OnResultExecutingImpl { get; set; }
+
+            public void OnResultExecuting(ResultExecutingContext filterContext)
+            {
+                OnResultExecutingImpl?.Invoke(filterContext);
+            }
+
+            public Action<ResultExecutedContext> OnResultExecutedImpl { get; set; }
+
+            public void OnResultExecuted(ResultExecutedContext filterContext)
+            {
+                OnResultExecutedImpl?.Invoke(filterContext);
+            }
+        }
+
+        private class AsyncActionFilterImpl : IAsyncActionFilter, IAsyncResultFilter
+        {
+            public Action<ActionExecutingContext> OnActionExecutingImpl { get; set; }
+
+            public void OnActionExecuting(ActionExecutingContext filterContext)
+            {
+                OnActionExecutingImpl?.Invoke(filterContext);
+            }
+
+            public Action<ActionExecutedContext> OnActionExecutedImpl { get; set; }
+
+            public void OnActionExecuted(ActionExecutedContext filterContext)
+            {
+                OnActionExecutedImpl?.Invoke(filterContext);
+            }
+
+            public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+            {
+                OnActionExecuting(context);
+                if (context.Result == null)
+                {
+                    OnActionExecuted(await next().ConfigureAwait(false));
+                }
+            }
+
+            public Action<ResultExecutingContext> OnResultExecutingImpl { get; set; }
+
+            public void OnResultExecuting(ResultExecutingContext filterContext)
+            {
+                OnResultExecutingImpl?.Invoke(filterContext);
+            }
+
+            public Action<ResultExecutedContext> OnResultExecutedImpl { get; set; }
+
+            public void OnResultExecuted(ResultExecutedContext filterContext)
+            {
+                OnResultExecutedImpl?.Invoke(filterContext);
+            }
+
+            public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+            {
+                OnResultExecuting(context);
+                if (!context.Cancel)
+                {
+                    OnResultExecuted(await next().ConfigureAwait(false));
+                }
             }
         }
     }
