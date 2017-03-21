@@ -8,6 +8,8 @@ Hydrogen.Extensions.Mvc5.Async
 
 Adds support for async filters (i.e. action filters, etc.) by implementing a custom `IAsyncActionInvoker`.
 
+Read the [blog article](http://josephdaigle.me/2017/03/20/Hydrogen.Extensions.Mvc5-alpha-release.html) about the alpha release.
+
 **How to use:**
 
 Swap out the default implementation `IAsyncActionInvoker` with `Hydrogen.Extensions.Mvc5.Async.ControllerActionInvokerEx`. There are two ways to do this:
